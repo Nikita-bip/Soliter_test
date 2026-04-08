@@ -12,7 +12,6 @@ namespace TestTask.Solitaire.Views
     {
         [Header("Logic")]
         [SerializeField] private RectTransform hitBox;
-        [SerializeField] private GameObject availableMarker;
         [SerializeField] private TMP_Text counterText;
 
         [Header("Pile Visuals")]
@@ -43,17 +42,23 @@ namespace TestTask.Solitaire.Views
             UpdateStackVisual(count);
         }
 
-        public void SetAvailable(bool available)
+        public bool ContainsScreenPoint(Vector2 screenPoint, Camera fallbackCamera)
         {
-            if (availableMarker != null)
-            {
-                availableMarker.SetActive(available);
-            }
-        }
+            var canvas = GetComponentInParent<Canvas>();
+            Camera eventCamera = fallbackCamera;
 
-        public bool ContainsScreenPoint(Vector2 screenPoint, Camera uiCamera)
-        {
-            return RectTransformUtility.RectangleContainsScreenPoint(hitBox, screenPoint, uiCamera);
+            if (canvas != null)
+            {
+                var rootCanvas = canvas.rootCanvas;
+                if (rootCanvas != null)
+                {
+                    eventCamera = rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay
+                        ? null
+                        : rootCanvas.worldCamera;
+                }
+            }
+
+            return RectTransformUtility.RectangleContainsScreenPoint(hitBox, screenPoint, eventCamera);
         }
 
         public void HideAnimatedCard()

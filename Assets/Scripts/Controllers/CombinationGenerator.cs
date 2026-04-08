@@ -8,37 +8,20 @@ namespace TestTask.Solitaire.Controllers
 {
     public static class CombinationGenerator
     {
-        private readonly struct GeneratedCard
-        {
-            public readonly CardDescriptor Descriptor;
-            public readonly int ComboIndex;
-
-            public GeneratedCard(CardDescriptor descriptor, int comboIndex)
-            {
-                Descriptor = descriptor;
-                ComboIndex = comboIndex;
-            }
-        }
-
         public static void Fill(GameModel model, SolitaireGeneratorSettings settings, int seed)
         {
             var random = new Random(seed);
             model.BankSequence.Clear();
-            model.BoardCardsPerCombo.Clear();
 
             var comboLengths = BuildComboLengths(model.AllCards.Count, settings, random);
-            var boardSolution = new List<GeneratedCard>(model.AllCards.Count);
+            var boardSolution = new List<CardDescriptor>(model.AllCards.Count);
 
-            for (var comboIndex = 0; comboIndex < comboLengths.Count; comboIndex++)
+            foreach (var comboLength in comboLengths)
             {
-                var comboLength = comboLengths[comboIndex];
-
                 var start = CreateRandomDescriptor(random);
                 model.BankSequence.Add(start);
 
                 var boardCardsInCombo = comboLength - 1;
-                model.BoardCardsPerCombo.Add(boardCardsInCombo);
-
                 var direction = random.NextDouble() <= settings.upwardChance ? 1 : -1;
                 var currentRank = start.Rank;
 
@@ -50,8 +33,7 @@ namespace TestTask.Solitaire.Controllers
                     }
 
                     currentRank = currentRank.Shift(direction);
-                    var descriptor = new CardDescriptor(currentRank, CreateRandomSuit(random));
-                    boardSolution.Add(new GeneratedCard(descriptor, comboIndex));
+                    boardSolution.Add(new CardDescriptor(currentRank, CreateRandomSuit(random)));
                 }
             }
 
@@ -68,6 +50,7 @@ namespace TestTask.Solitaire.Controllers
             while (remaining > 0)
             {
                 var possibleBoardCounts = new List<int>();
+
                 for (var boardPart = boardMin; boardPart <= boardMax; boardPart++)
                 {
                     if (boardPart > remaining)
@@ -90,10 +73,10 @@ namespace TestTask.Solitaire.Controllers
             return result;
         }
 
-        private static void DistributeSolutionAcrossPiles(GameModel model, IReadOnlyList<GeneratedCard> boardSolution, Random random)
+        private static void DistributeSolutionAcrossPiles(GameModel model, IReadOnlyList<CardDescriptor> boardSolution, Random random)
         {
             var perPile = model.Piles
-                .Select(pile => new List<GeneratedCard>(pile.Capacity))
+                .Select(pile => new List<CardDescriptor>(pile.Capacity))
                 .ToList();
 
             var remainingCapacity = model.Piles
@@ -108,7 +91,7 @@ namespace TestTask.Solitaire.Controllers
 
             var cursor = 0;
 
-            // Гарантируем, что каждая кучка получает хотя бы одну карту, если карт хватает.
+            // Гарантируем, что каждая кучка получит хотя бы одну карту, если карт хватает.
             foreach (var pileIndex in availablePileIndices)
             {
                 if (cursor >= boardSolution.Count)
@@ -123,6 +106,7 @@ namespace TestTask.Solitaire.Controllers
             while (cursor < boardSolution.Count)
             {
                 var candidates = new List<int>();
+
                 for (var i = 0; i < remainingCapacity.Length; i++)
                 {
                     if (remainingCapacity[i] > 0)
@@ -143,8 +127,7 @@ namespace TestTask.Solitaire.Controllers
 
                 for (var cardIndex = 0; cardIndex < pile.CardsTopToBottom.Count; cardIndex++)
                 {
-                    pile.CardsTopToBottom[cardIndex].Descriptor = assigned[cardIndex].Descriptor;
-                    pile.CardsTopToBottom[cardIndex].ComboIndex = assigned[cardIndex].ComboIndex;
+                    pile.CardsTopToBottom[cardIndex].Descriptor = assigned[cardIndex];
                 }
             }
         }

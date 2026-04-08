@@ -21,7 +21,6 @@ namespace TestTask.Solitaire.Controllers
         [SerializeField] private HUDView hudView;
         [SerializeField] private Camera uiCamera;
         [SerializeField] private SolitaireInputRouter inputRouter;
-        [SerializeField] private SolitaireAudio solitaireAudio;
 
         [Header("Settings")]
         [SerializeField] private SolitaireGeneratorSettings settings = new();
@@ -48,6 +47,16 @@ namespace TestTask.Solitaire.Controllers
             await RestartLevelAsync();
         }
 
+        public void OnRestartButtonPressed()
+        {
+            if (_model != null && _model.IsBusy)
+            {
+                return;
+            }
+
+            RestartFromInspector();
+        }
+
         public async Task RestartLevelAsync()
         {
             if (_model == null)
@@ -61,17 +70,18 @@ namespace TestTask.Solitaire.Controllers
             _model.ResetRuntimeState();
 
             hudView.ResetPanels();
+
             currentCardSlotView.SetSpriteLibrary(spriteLibrary);
-
-            bankView.SetSpriteLibrary(spriteLibrary);
-            bankView.HideAnimatedCard();
-
             currentCardSlotView.Show(_model.CurrentDescriptor);
-            RefreshBankView();
+
+            if (bankView != null)
+            {
+                bankView.SetSpriteLibrary(spriteLibrary);
+                bankView.HideAnimatedCard();
+            }
 
             foreach (var card in _model.AllCards)
             {
-                card.View.transform.DOKill();
                 card.View.SetSpriteLibrary(spriteLibrary);
                 card.View.SetDescriptor(card.Descriptor, false);
                 card.View.ResetVisualState(faceUp: false, visible: true);
@@ -92,6 +102,9 @@ namespace TestTask.Solitaire.Controllers
                 top.View.ResetVisualState(faceUp: true, visible: true);
             }
 
+            RefreshBankView();
+            RefreshHud();
+
             inputRouter.Initialize(this);
             await Task.Yield();
         }
@@ -100,17 +113,6 @@ namespace TestTask.Solitaire.Controllers
         {
             if (_model == null || !_model.IsPlaying || _model.IsBusy)
             {
-                return false;
-            }
-
-            if (_model.CanOpenNextBank)
-            {
-                if (bankView != null && bankView.ContainsScreenPoint(screenPoint, uiCamera))
-                {
-                    _ = TryUseBankAsync();
-                    return true;
-                }
-
                 return false;
             }
 
@@ -161,23 +163,12 @@ namespace TestTask.Solitaire.Controllers
                 return;
             }
 
-            if (_model.CanOpenNextBank)
-            {
-                return;
-            }
-
-            if (card.ComboIndex != _model.CurrentComboIndex)
-            {
-                return;
-            }
-
             if (!_model.CurrentDescriptor.Rank.IsAdjacentCyclic(card.Descriptor.Rank))
             {
                 return;
             }
 
-            _model.IsBusy = true; 
-            solitaireAudio?.PlayTakeCard();
+            _model.IsBusy = true;
             card.View.transform.SetAsLastSibling();
 
             await card.View.FlyToAsync(currentCardAnchor, settings.moveDuration);
@@ -186,7 +177,6 @@ namespace TestTask.Solitaire.Controllers
             card.IsRemoved = true;
             _model.CurrentDescriptor = card.Descriptor;
             currentCardSlotView.Show(_model.CurrentDescriptor);
-            _model.TakenInCurrentCombo++;
 
             if (card.Child != null && !card.Child.IsRemoved)
             {
@@ -197,6 +187,7 @@ namespace TestTask.Solitaire.Controllers
             }
 
             RefreshBankView();
+            RefreshHud();
 
             if (_model.RemainingCards == 0)
             {
@@ -225,26 +216,27 @@ namespace TestTask.Solitaire.Controllers
             }
 
             _model.IsBusy = true;
-            solitaireAudio?.PlayBank();
 
             var nextDescriptor = _model.BankSequence[_model.NextBankIndex];
 
-            await bankView.PlayDrawToAsync(
-                nextDescriptor,
-                currentCardAnchor,
-                settings.moveDuration,
-                settings.flipDuration);
+            if (bankView != null && currentCardAnchor != null)
+            {
+                await bankView.PlayDrawToAsync(
+                    nextDescriptor,
+                    currentCardAnchor,
+                    settings.moveDuration,
+                    settings.flipDuration);
+            }
 
             _model.CurrentDescriptor = nextDescriptor;
             _model.NextBankIndex++;
-            _model.CurrentComboIndex++;
-            _model.TakenInCurrentCombo = 0;
 
             currentCardSlotView.Show(_model.CurrentDescriptor);
 
             RefreshBankView();
+            RefreshHud();
 
-            await Task.Delay(System.TimeSpan.FromSeconds(settings.revealDelay));
+            await Task.Delay(TimeSpan.FromSeconds(settings.revealDelay));
 
             if (!HasAvailableMove() && !_model.CanOpenNextBank)
             {
@@ -261,25 +253,25 @@ namespace TestTask.Solitaire.Controllers
                 card.IsOpen &&
                 card.IsExposed &&
                 !card.IsRemoved &&
-                card.ComboIndex == _model.CurrentComboIndex &&
                 _model.CurrentDescriptor.Rank.IsAdjacentCyclic(card.Descriptor.Rank));
         }
 
         private void RefreshBankView()
         {
-            bankView.SetRemaining(_model.RemainingBankCards);
-            bankView.SetAvailable(_model.CanOpenNextBank);
-        }
-
-        public void OnRestartButtonPressed()
-        {
-            if (_model != null && _model.IsBusy)
+            if (bankView == null)
             {
                 return;
             }
 
-            solitaireAudio?.StopAll();
-            RestartFromInspector();
+            bankView.SetRemaining(_model.RemainingBankCards);
+        }
+
+        private void RefreshHud()
+        {
+            if (hudView == null)
+            {
+                return;
+            }
         }
     }
 }

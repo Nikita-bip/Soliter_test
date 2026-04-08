@@ -8,7 +8,6 @@ namespace TestTask.Solitaire.Models
         public int Id;
         public int PileIndex;
         public int IndexInPile;
-        public int ComboIndex;
         public CardDescriptor Descriptor;
         public CardModel Parent; // Карта, перекрывающая текущую.
         public CardModel Child;  // Карта, лежащая под текущей.
@@ -21,7 +20,7 @@ namespace TestTask.Solitaire.Models
 
         public override string ToString()
         {
-            return $"Card {Id} | pile {PileIndex} | idx {IndexInPile} | combo {ComboIndex} | {Descriptor.Rank.ToShortString()}";
+            return $"Card {Id} | pile {PileIndex} | idx {IndexInPile} | {Descriptor.Rank.ToShortString()}";
         }
     }
 }
