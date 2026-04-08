@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TestTask.Solitaire.Models
+namespace Assets.Scripts.Models
 {
     public sealed class GameModel
     {
@@ -17,7 +17,6 @@ namespace TestTask.Solitaire.Models
         public int RemainingCards => AllCards.Count(card => !card.IsRemoved);
         public int RemainingBankCards => BankSequence.Count - NextBankIndex;
 
-        // Банк доступен всегда, пока в нем есть следующая карта.
         public bool CanOpenNextBank =>
             IsPlaying &&
             NextBankIndex < BankSequence.Count;

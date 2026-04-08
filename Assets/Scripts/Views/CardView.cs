@@ -1,15 +1,16 @@
 using System.Threading.Tasks;
+using Assets.Scripts.Models;
 using DG.Tweening;
-using TestTask.Solitaire.Models;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace TestTask.Solitaire.Views
+namespace Assets.Scripts.Views
 {
     public sealed class CardView : MonoBehaviour
     {
         [SerializeField] private Image faceImage;
         [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private Image highlightImage;
 
         private RectTransform _rectTransform;
         private CardSpriteLibrary _spriteLibrary;
@@ -76,6 +77,8 @@ namespace TestTask.Solitaire.Views
                 canvasGroup.DOKill();
             }
 
+            ClearHint();
+
             transform.SetSiblingIndex(_initialSiblingIndex);
 
             RectTransform.anchoredPosition = _initialAnchoredPosition;
@@ -98,6 +101,61 @@ namespace TestTask.Solitaire.Views
             IsFaceUp = faceUp;
             RefreshSprite();
             SetInteractable(false);
+            ClearHint();
+        }
+
+
+        public void ClearHint()
+        {
+            if (highlightImage == null)
+            {
+                return;
+            }
+
+            highlightImage.DOKill();
+            highlightImage.rectTransform.DOKill();
+
+            var color = highlightImage.color;
+            color.a = 0.5f;
+            highlightImage.color = color;
+
+            highlightImage.rectTransform.localScale = Vector3.one;
+            highlightImage.gameObject.SetActive(false);
+        }
+
+        private void OnDisable()
+        {
+            ClearHint();
+        }
+
+        public void ShowHintPulse()
+        {
+            if (highlightImage == null)
+            {
+                return;
+            }
+
+            ClearHint();
+
+            var color = highlightImage.color;
+            color.a = 0.5f;
+            highlightImage.color = color;
+
+            highlightImage.gameObject.SetActive(true);
+            highlightImage.rectTransform.localScale = Vector3.one;
+
+            highlightImage.rectTransform
+                .DOScale(1.08f, 0.35f)
+                .SetLoops(4, LoopType.Yoyo)
+                .SetEase(Ease.InOutSine);
+        }
+
+        public void SetHintVisible(bool visible)
+        {
+            if (highlightImage != null)
+            {
+                highlightImage.gameObject.SetActive(visible);
+            }
         }
 
         public async Task FlipAsync(bool faceUp, float duration)

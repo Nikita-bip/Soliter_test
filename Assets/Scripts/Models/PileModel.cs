@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TestTask.Solitaire.Models
+namespace Assets.Scripts.Models
 {
     public sealed class PileModel
     {

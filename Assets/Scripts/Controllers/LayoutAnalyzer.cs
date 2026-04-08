@@ -1,11 +1,11 @@
+using Assets.Scripts.Models;
+using Assets.Scripts.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TestTask.Solitaire.Models;
-using TestTask.Solitaire.Views;
 using UnityEngine;
 
-namespace TestTask.Solitaire.Controllers
+namespace Assets.Scripts.Controllers
 {
     public static class LayoutAnalyzer
     {
@@ -112,7 +112,6 @@ namespace TestTask.Solitaire.Controllers
 
             var ordered = new List<CardView>(remaining.Count);
 
-            // Верхняя карта — самая высокая по Y.
             var current = remaining[0];
             ordered.Add(current);
             remaining.RemoveAt(0);
@@ -152,7 +151,6 @@ namespace TestTask.Solitaire.Controllers
             var upperY = upper.RectTransform.position.y;
             var lowerY = lower.RectTransform.position.y;
 
-            // Потомок не должен быть выше предка.
             if (lowerY > upperY + 0.01f)
             {
                 return float.MinValue;
@@ -165,10 +163,6 @@ namespace TestTask.Solitaire.Controllers
             var verticalGap = upperY - lowerY;
             var horizontalOffset = Mathf.Abs(upperRect.center.x - lowerRect.center.x);
 
-            // Приоритет:
-            // 1) фактическое перекрытие,
-            // 2) близость по вертикали,
-            // 3) близость по X.
             return overlapArea * 1000f - verticalGap * 10f - horizontalOffset;
         }
 

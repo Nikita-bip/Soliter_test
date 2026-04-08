@@ -1710,6 +1710,7 @@ MonoBehaviour:
   hudView: {fileID: 320815298}
   uiCamera: {fileID: 0}
   inputRouter: {fileID: 1772508536}
+  solitaireAudio: {fileID: 275378539}
   settings:
     pileGroupingThreshold: 120
     upwardChance: 0.65
@@ -6390,7 +6391,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestTask.Solitaire.Views.BankView
   hitBox: {fileID: 691662958}
-  availableMarker: {fileID: 0}
   counterText: {fileID: 700075199}
   drawFromAnchor: {fileID: 282714510}
   stackCards:

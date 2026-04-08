@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Assets.Scripts.Config;
+using Assets.Scripts.Models;
+using Assets.Scripts.Views;
 using DG.Tweening;
-using TestTask.Solitaire.Config;
-using TestTask.Solitaire.Models;
-using TestTask.Solitaire.Views;
 using UnityEngine;
 
-namespace TestTask.Solitaire.Controllers
+namespace Assets.Scripts.Controllers
 {
     public sealed class SolitaireController : MonoBehaviour
     {
@@ -21,6 +21,7 @@ namespace TestTask.Solitaire.Controllers
         [SerializeField] private HUDView hudView;
         [SerializeField] private Camera uiCamera;
         [SerializeField] private SolitaireInputRouter inputRouter;
+        [SerializeField] private SolitaireAudio solitaireAudio;
 
         [Header("Settings")]
         [SerializeField] private SolitaireGeneratorSettings settings = new();
@@ -64,6 +65,8 @@ namespace TestTask.Solitaire.Controllers
                 BuildStaticModel();
             }
 
+            ClearAllHints();
+
             _currentSeed = randomizeSeedOnStart ? Environment.TickCount : fixedSeed;
 
             CombinationGenerator.Fill(_model, settings, _currentSeed);
@@ -78,6 +81,7 @@ namespace TestTask.Solitaire.Controllers
             {
                 bankView.SetSpriteLibrary(spriteLibrary);
                 bankView.HideAnimatedCard();
+                bankView.ClearHint();
             }
 
             foreach (var card in _model.AllCards)
@@ -88,7 +92,6 @@ namespace TestTask.Solitaire.Controllers
                 card.View.SetInteractable(false);
             }
 
-            // Изначально открываем только верхние карты.
             foreach (var pile in _model.Piles)
             {
                 var top = pile.GetTopExposedCard();
@@ -169,6 +172,9 @@ namespace TestTask.Solitaire.Controllers
             }
 
             _model.IsBusy = true;
+            solitaireAudio?.PlayTakeCard();
+            card.View.transform.SetAsLastSibling();
+
             card.View.transform.SetAsLastSibling();
 
             await card.View.FlyToAsync(currentCardAnchor, settings.moveDuration);
@@ -216,7 +222,7 @@ namespace TestTask.Solitaire.Controllers
             }
 
             _model.IsBusy = true;
-
+            solitaireAudio?.PlayBank();
             var nextDescriptor = _model.BankSequence[_model.NextBankIndex];
 
             if (bankView != null && currentCardAnchor != null)
@@ -254,6 +260,54 @@ namespace TestTask.Solitaire.Controllers
                 card.IsExposed &&
                 !card.IsRemoved &&
                 _model.CurrentDescriptor.Rank.IsAdjacentCyclic(card.Descriptor.Rank));
+        }
+
+        public void ShowHint()
+        {
+            if (_model == null || !_model.IsPlaying || _model.IsBusy)
+            {
+                return;
+            }
+
+            ClearAllHints();
+
+            var hint = HintSolver.GetBestMove(_model);
+
+            switch (hint.Type)
+            {
+                case HintSolver.HintMoveType.TakeCard:
+                    if (hint.Card != null)
+                    {
+                        hint.Card.View.ShowHintPulse();
+                    }
+                    break;
+
+                case HintSolver.HintMoveType.OpenBank:
+                    if (bankView != null)
+                    {
+                        bankView.ShowHintPulse();
+                    }
+                    break;
+
+                case HintSolver.HintMoveType.None:
+                    break;
+            }
+        }
+
+        private void ClearAllHints()
+        {
+            if (_model == null)
+            {
+                return;
+            }
+
+            foreach (var card in _model.AllCards)
+            {
+                if (card?.View != null)
+                {
+                    card.View.ClearHint();
+                }
+            }
         }
 
         private void RefreshBankView()

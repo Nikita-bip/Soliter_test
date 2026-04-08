@@ -1,7 +1,7 @@
-using TestTask.Solitaire.Views;
+using Assets.Scripts.Views;
 using UnityEngine;
 
-namespace TestTask.Solitaire.Models
+namespace Assets.Scripts.Models
 {
     public sealed class CardModel
     {
@@ -9,8 +9,8 @@ namespace TestTask.Solitaire.Models
         public int PileIndex;
         public int IndexInPile;
         public CardDescriptor Descriptor;
-        public CardModel Parent; // Карта, перекрывающая текущую.
-        public CardModel Child;  // Карта, лежащая под текущей.
+        public CardModel Parent;
+        public CardModel Child;
         public bool IsOpen;
         public bool IsRemoved;
         public Vector2 InitialAnchoredPosition;

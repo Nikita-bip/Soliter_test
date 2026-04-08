@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TestTask.Solitaire.Config
+namespace Assets.Scripts.Config
 {
     [System.Serializable]
     public sealed class SolitaireGeneratorSettings

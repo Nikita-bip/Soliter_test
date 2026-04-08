@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DG.Tweening;
 using TMPro;
-using TestTask.Solitaire.Models;
 using UnityEngine;
 using UnityEngine.UI;
+using Assets.Scripts.Models;
 
-namespace TestTask.Solitaire.Views
+namespace Assets.Scripts.Views
 {
     public sealed class BankView : MonoBehaviour
     {
@@ -132,6 +132,28 @@ namespace TestTask.Solitaire.Views
             }
         }
 
+        public void ShowHintPulse()
+        {
+            ClearHint();
+
+            transform.DOKill();
+            transform.localScale = Vector3.one;
+
+            transform
+                .DOScale(1.05f, 0.3f)
+                .SetLoops(4, LoopType.Yoyo)
+                .SetEase(Ease.InOutSine);
+        }
+        public void ClearHint()
+        {
+            transform.DOKill();
+            transform.localScale = Vector3.one;
+
+            if (animatedCardRoot != null)
+            {
+                animatedCardRoot.DOKill();
+            }
+        }
         private static Task WaitTween(Tween tween)
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -140,6 +162,11 @@ namespace TestTask.Solitaire.Views
             tween.onKill += () => tcs.TrySetResult(true);
 
             return tcs.Task;
+        }
+
+        private void OnDisable()
+        {
+            ClearHint();
         }
     }
 }

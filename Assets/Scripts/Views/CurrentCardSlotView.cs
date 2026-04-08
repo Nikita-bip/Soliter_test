@@ -1,8 +1,8 @@
-using TestTask.Solitaire.Models;
+using Assets.Scripts.Models;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace TestTask.Solitaire.Views
+namespace Assets.Scripts.Views
 {
     public sealed class CurrentCardSlotView : MonoBehaviour
     {

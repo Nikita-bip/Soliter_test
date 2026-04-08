@@ -1,8 +1,8 @@
-using TestTask.Solitaire.Views;
+using Assets.Scripts.Views;
 using UnityEditor;
 using UnityEngine;
 
-namespace TestTask.Solitaire.Editor
+namespace Assets.Scripts.Editor
 {
     [CustomEditor(typeof(CardSpriteLibrary))]
     public sealed class CardSpriteLibraryEditor : UnityEditor.Editor

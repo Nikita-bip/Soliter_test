@@ -1,45 +1,13 @@
+using Assets.Scripts.Config;
+using Assets.Scripts.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TestTask.Solitaire.Config;
-using TestTask.Solitaire.Models;
 
-namespace TestTask.Solitaire.Controllers
+namespace Assets.Scripts.Controllers
 {
     public static class CombinationGenerator
     {
-        public static void Fill(GameModel model, SolitaireGeneratorSettings settings, int seed)
-        {
-            var random = new Random(seed);
-            model.BankSequence.Clear();
-
-            var comboLengths = BuildComboLengths(model.AllCards.Count, settings, random);
-            var boardSolution = new List<CardDescriptor>(model.AllCards.Count);
-
-            foreach (var comboLength in comboLengths)
-            {
-                var start = CreateRandomDescriptor(random);
-                model.BankSequence.Add(start);
-
-                var boardCardsInCombo = comboLength - 1;
-                var direction = random.NextDouble() <= settings.upwardChance ? 1 : -1;
-                var currentRank = start.Rank;
-
-                for (var i = 0; i < boardCardsInCombo; i++)
-                {
-                    if (i > 0 && random.NextDouble() <= settings.directionFlipChance)
-                    {
-                        direction *= -1;
-                    }
-
-                    currentRank = currentRank.Shift(direction);
-                    boardSolution.Add(new CardDescriptor(currentRank, CreateRandomSuit(random)));
-                }
-            }
-
-            DistributeSolutionAcrossPiles(model, boardSolution, random);
-        }
-
         private static List<int> BuildComboLengths(int boardCardsCount, SolitaireGeneratorSettings settings, Random random)
         {
             var result = new List<int>();
@@ -91,7 +59,6 @@ namespace TestTask.Solitaire.Controllers
 
             var cursor = 0;
 
-            // Гарантируем, что каждая кучка получит хотя бы одну карту, если карт хватает.
             foreach (var pileIndex in availablePileIndices)
             {
                 if (cursor >= boardSolution.Count)
@@ -140,6 +107,38 @@ namespace TestTask.Solitaire.Controllers
         private static CardSuit CreateRandomSuit(Random random)
         {
             return (CardSuit)random.Next(0, 4);
+        }
+
+        public static void Fill(GameModel model, SolitaireGeneratorSettings settings, int seed)
+        {
+            var random = new Random(seed);
+            model.BankSequence.Clear();
+
+            var comboLengths = BuildComboLengths(model.AllCards.Count, settings, random);
+            var boardSolution = new List<CardDescriptor>(model.AllCards.Count);
+
+            foreach (var comboLength in comboLengths)
+            {
+                var start = CreateRandomDescriptor(random);
+                model.BankSequence.Add(start);
+
+                var boardCardsInCombo = comboLength - 1;
+                var direction = random.NextDouble() <= settings.upwardChance ? 1 : -1;
+                var currentRank = start.Rank;
+
+                for (var i = 0; i < boardCardsInCombo; i++)
+                {
+                    if (i > 0 && random.NextDouble() <= settings.directionFlipChance)
+                    {
+                        direction *= -1;
+                    }
+
+                    currentRank = currentRank.Shift(direction);
+                    boardSolution.Add(new CardDescriptor(currentRank, CreateRandomSuit(random)));
+                }
+            }
+
+            DistributeSolutionAcrossPiles(model, boardSolution, random);
         }
     }
 }

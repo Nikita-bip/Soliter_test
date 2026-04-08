@@ -1,4 +1,4 @@
-namespace TestTask.Solitaire.Models
+namespace Assets.Scripts.Models
 {
     public enum CardRank
     {

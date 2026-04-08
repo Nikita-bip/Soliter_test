@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TestTask.Solitaire.Models;
 using UnityEngine;
-
+using Assets.Scripts.Models;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-namespace TestTask.Solitaire.Views
+namespace Assets.Scripts.Views
 {
     [CreateAssetMenu(menuName = "TestTask/Solitaire/Card Sprite Library", fileName = "CardSpriteLibrary")]
     public sealed class CardSpriteLibrary : ScriptableObject
@@ -75,7 +74,6 @@ namespace TestTask.Solitaire.Views
             {
                 var assetPath = AssetDatabase.GUIDToAssetPath(guid);
 
-                // Поддержка и одиночных спрайтов, и спрайтшитов.
                 var sprites = AssetDatabase.LoadAllAssetsAtPath(assetPath)
                     .OfType<Sprite>()
                     .ToArray();
@@ -112,8 +110,6 @@ namespace TestTask.Solitaire.Views
                 }
             }
 
-            // Убираем дубли: если вдруг одна и та же карта встретилась несколько раз,
-            // берём последнюю найденную.
             faceSprites = tempEntries
                 .GroupBy(x => (x.rank, x.suit))
                 .Select(g => g.Last())

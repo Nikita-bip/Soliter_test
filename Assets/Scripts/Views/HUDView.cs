@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace TestTask.Solitaire.Views
+namespace Assets.Scripts.Views
 {
     public sealed class HUDView : MonoBehaviour
     {

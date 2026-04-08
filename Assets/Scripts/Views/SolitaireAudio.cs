@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TestTask.Solitaire.Views
+namespace Assets.Scripts.Views
 {
     public sealed class SolitaireAudio : MonoBehaviour
     {
@@ -10,15 +10,23 @@ namespace TestTask.Solitaire.Views
         [SerializeField] private AudioClip takeCardClip;
         [SerializeField] private AudioClip bankClip;
 
-
         [Header("Volumes")]
         [Range(0f, 1f)][SerializeField] private float takeCardVolume = 1f;
         [Range(0f, 1f)][SerializeField] private float bankVolume = 1f;
 
-
         private void Reset()
         {
             audioSource = GetComponent<AudioSource>();
+        }
+
+        private void PlayOneShot(AudioClip clip, float volume)
+        {
+            if (audioSource == null || clip == null)
+            {
+                return;
+            }
+
+            audioSource.PlayOneShot(clip, volume);
         }
 
         public void PlayTakeCard()
@@ -37,16 +45,6 @@ namespace TestTask.Solitaire.Views
             {
                 audioSource.Stop();
             }
-        }
-
-        private void PlayOneShot(AudioClip clip, float volume)
-        {
-            if (audioSource == null || clip == null)
-            {
-                return;
-            }
-
-            audioSource.PlayOneShot(clip, volume);
         }
     }
 }

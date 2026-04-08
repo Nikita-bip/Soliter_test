@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using DG.Tweening;
 
-namespace TestTask.Solitaire.Utils
+namespace Assets.Scripts.Utils
 {
     public static class DOTweenAsyncExtensions
     {

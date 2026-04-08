@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TestTask.Solitaire.Controllers
+namespace Assets.Scripts.Controllers
 {
     public sealed class SolitaireInputRouter : MonoBehaviour
     {
@@ -15,6 +15,12 @@ namespace TestTask.Solitaire.Controllers
         {
             if (_controller == null || _controller.IsBusy)
             {
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0))
+            {
+                _controller.ShowHint();
                 return;
             }
 
